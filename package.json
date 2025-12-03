@@ -1,0 +1,22 @@
+{
+    "name": "virada-no-rio-monorepo",
+    "version": "1.0.0",
+    "description": "Virada no Rio - MERN Stack Todo List",
+    "private": true,
+    "scripts": {
+        "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+        "dev:backend": "cd backend && npm run dev",
+        "dev:frontend": "cd frontend && npm run dev",
+        "build:frontend": "cd frontend && npm run build",
+        "start": "cd backend && npm start",
+        "render:build": "cd backend && npm install && cd ../frontend && npm install && npm run build"
+    },
+    "keywords": [
+        "mern",
+        "todo",
+        "socket.io",
+        "real-time"
+    ],
+    "author": "",
+    "license": "ISC"
+}
