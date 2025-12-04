@@ -83,12 +83,11 @@ mongoose.connect(MONGODB_URI)
     });
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
     console.log('SIGTERM received, closing server...');
-    httpServer.close(() => {
-        mongoose.connection.close(false, () => {
-            console.log('Server closed');
-            process.exit(0);
-        });
+    httpServer.close(async () => {
+        await mongoose.connection.close();
+        console.log('Server closed');
+        process.exit(0);
     });
 });
