@@ -1,16 +1,25 @@
 import { CheckCircle2, Trash2, MapPin } from 'lucide-react';
 import { CATEGORIES } from '../config/categories';
 
-const VibeCard = ({ item, onToggle, onDelete }) => {
+const VibeCard = ({ item, onToggle, onDelete, onCardClick }) => {
     const categoryConfig = Object.values(CATEGORIES).find(c => c.id === item.category) || CATEGORIES.TOUR;
     const IconComponent = categoryConfig.icon;
 
+    const handleCardClick = (e) => {
+        // Only trigger if clicking the card itself, not buttons
+        if (e.target === e.currentTarget || e.target.closest('.card-content')) {
+            onCardClick?.(item);
+        }
+    };
+
     return (
-        <div className={`
-      relative group mb-4 overflow-hidden rounded-3xl transition-all duration-500 shadow-lg
+        <div
+            onClick={handleCardClick}
+            className={`
+      relative group mb-4 overflow-hidden rounded-3xl transition-all duration-500 shadow-lg cursor-pointer
       ${item.done
-                ? 'opacity-80 scale-[0.98] grayscale-[0.3]'
-                : 'hover:scale-[1.02] hover:-translate-y-1 hover:shadow-2xl'}
+                    ? 'opacity-80 scale-[0.98] grayscale-[0.3]'
+                    : 'hover:scale-[1.02] hover:-translate-y-1 hover:shadow-2xl'}
     `}>
             {/* High contrast background - almost solid white */}
             <div className="absolute inset-0 bg-white/90 backdrop-blur-xl transition-all duration-500 group-hover:bg-white/95" />
@@ -20,7 +29,10 @@ const VibeCard = ({ item, onToggle, onDelete }) => {
 
             <div className="relative p-6 flex items-center gap-5">
                 <button
-                    onClick={() => onToggle(item._id, !item.done)}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onToggle(item._id, !item.done);
+                    }}
                     className="shrink-0 transition-all duration-300 hover:scale-110 focus:outline-none group/check"
                 >
                     {item.done ? (
@@ -36,7 +48,7 @@ const VibeCard = ({ item, onToggle, onDelete }) => {
                     )}
                 </button>
 
-                <div className="flex-1 min-w-0 flex flex-col justify-center gap-2">
+                <div className="flex-1 min-w-0 flex flex-col justify-center gap-2 card-content">
                     <h3 className={`text-xl font-black text-slate-800 leading-tight tracking-tight transition-all ${item.done ? 'line-through opacity-60' : ''}`}>
                         {item.title}
                     </h3>
@@ -58,7 +70,10 @@ const VibeCard = ({ item, onToggle, onDelete }) => {
                 </div>
 
                 <button
-                    onClick={() => onDelete(item._id)}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(item._id);
+                    }}
                     className="shrink-0 p-3 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-2xl transition-all opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 duration-300"
                 >
                     <Trash2 size={20} strokeWidth={2.5} />

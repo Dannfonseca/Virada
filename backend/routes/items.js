@@ -13,6 +13,93 @@ router.get('/', async (req, res) => {
     }
 });
 
+// GET single item by ID
+router.get('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const item = await Item.findById(id);
+
+        if (!item) {
+            return res.status(404).json({ error: 'Item not found' });
+        }
+
+        res.json(item);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// POST comment to item
+router.post('/:id/comments', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { text } = req.body;
+
+        if (!text || text.trim() === '') {
+            return res.status(400).json({ error: 'Comment text is required' });
+        }
+
+        const item = await Item.findById(id);
+
+        if (!item) {
+            return res.status(404).json({ error: 'Item not found' });
+        }
+
+        const newComment = {
+            text: text.trim(),
+            createdAt: new Date()
+        };
+
+        item.comments.push(newComment);
+        await item.save();
+
+        // Emit socket event
+        req.io.emit('item:comment-added', {
+            itemId: id,
+            comment: newComment
+        });
+
+        res.status(201).json(item);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// DELETE comment from item
+router.delete('/:id/comments/:commentId', async (req, res) => {
+    try {
+        const { id, commentId } = req.params;
+
+        const item = await Item.findById(id);
+
+        if (!item) {
+            return res.status(404).json({ error: 'Item not found' });
+        }
+
+        // Find and remove the comment
+        const commentIndex = item.comments.findIndex(
+            comment => comment._id.toString() === commentId
+        );
+
+        if (commentIndex === -1) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        item.comments.splice(commentIndex, 1);
+        await item.save();
+
+        // Emit socket event
+        req.io.emit('item:comment-deleted', {
+            itemId: id,
+            commentId: commentId
+        });
+
+        res.json(item);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // POST new item
 router.post('/', async (req, res) => {
     try {

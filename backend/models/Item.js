@@ -20,6 +20,17 @@ const itemSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    comments: [{
+        text: {
+            type: String,
+            required: true,
+            trim: true
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now
+        }
+    }],
     createdAt: {
         type: Date,
         default: Date.now

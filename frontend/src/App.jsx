@@ -7,6 +7,7 @@ import Sidebar from './components/Sidebar';
 import VibeCard from './components/VibeCard';
 import AddModal from './components/AddModal';
 import DeleteModal from './components/DeleteModal';
+import ItemDetailsModal from './components/ItemDetailsModal';
 import { itemsAPI } from './services/api';
 import socket from './services/socket';
 
@@ -17,6 +18,8 @@ export default function App() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
+    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+    const [selectedItem, setSelectedItem] = useState(null);
     const [loading, setLoading] = useState(true);
 
     // Load items from API on mount
@@ -56,13 +59,51 @@ export default function App() {
             setItems(prevItems => prevItems.filter(item => item._id !== deletedId));
         });
 
+        // Listen for comment updates
+        socket.on('item:comment-added', ({ itemId, comment }) => {
+            setItems(prevItems =>
+                prevItems.map(item =>
+                    item._id === itemId
+                        ? { ...item, comments: [...(item.comments || []), comment] }
+                        : item
+                )
+            );
+            // Update selected item if it's the one being viewed
+            if (selectedItem?._id === itemId) {
+                setSelectedItem(prev => ({
+                    ...prev,
+                    comments: [...(prev.comments || []), comment]
+                }));
+            }
+        });
+
+        // Listen for comment deletions
+        socket.on('item:comment-deleted', ({ itemId, commentId }) => {
+            setItems(prevItems =>
+                prevItems.map(item =>
+                    item._id === itemId
+                        ? { ...item, comments: item.comments.filter(c => c._id !== commentId) }
+                        : item
+                )
+            );
+            // Update selected item if it's the one being viewed
+            if (selectedItem?._id === itemId) {
+                setSelectedItem(prev => ({
+                    ...prev,
+                    comments: prev.comments.filter(c => c._id !== commentId)
+                }));
+            }
+        });
+
         // Cleanup listeners on unmount
         return () => {
             socket.off('item:created');
             socket.off('item:updated');
             socket.off('item:deleted');
+            socket.off('item:comment-added');
+            socket.off('item:comment-deleted');
         };
-    }, []);
+    }, [selectedItem]);
 
     const handleAddItem = async (newItem) => {
         try {
@@ -82,7 +123,8 @@ export default function App() {
         }
     };
 
-    const handleDeleteItem = (item) => {
+    const handleDeleteItem = (id) => {
+        const item = items.find(i => i._id === id);
         setItemToDelete(item);
         setIsDeleteModalOpen(true);
     };
@@ -91,10 +133,33 @@ export default function App() {
         if (!itemToDelete) return;
         try {
             await itemsAPI.delete(itemToDelete._id);
+            setIsDeleteModalOpen(false);
+            setItemToDelete(null);
             // Item will be deleted via socket event
         } catch (error) {
             console.error('Error deleting item:', error);
         }
+    };
+
+    const handleCardClick = async (item) => {
+        try {
+            // Fetch fresh item data with comments
+            const fullItem = await itemsAPI.getById(item._id);
+            setSelectedItem(fullItem);
+            setIsDetailsModalOpen(true);
+        } catch (error) {
+            console.error('Error fetching item details:', error);
+        }
+    };
+
+    const handleCommentAdded = (updatedItem) => {
+        setSelectedItem(updatedItem);
+        // Update in items list
+        setItems(prevItems =>
+            prevItems.map(item =>
+                item._id === updatedItem._id ? updatedItem : item
+            )
+        );
     };
 
     const filteredItems = useMemo(() => activeTab === 'ALL' ? items : items.filter(i => i.category === activeTab), [items, activeTab]);
@@ -165,13 +230,14 @@ export default function App() {
                             <p className="text-white/90 max-w-[200px] font-medium drop-shadow-md">Abra o menu ou adicione um novo destino para o Verão.</p>
                         </div>
                     ) : (
-                        <div className="space-y-2 animate-in slide-in-from-bottom-20">
+                        <div className="space-y-2">
                             {filteredItems.map(item => (
                                 <VibeCard
-                                    key={item.id}
+                                    key={item._id}
                                     item={item}
                                     onToggle={handleToggleItem}
                                     onDelete={handleDeleteItem}
+                                    onCardClick={handleCardClick}
                                 />
                             ))}
                         </div>
@@ -200,6 +266,16 @@ export default function App() {
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={confirmDelete}
                 itemTitle={itemToDelete?.title || ''}
+            />
+
+            <ItemDetailsModal
+                isOpen={isDetailsModalOpen}
+                onClose={() => {
+                    setIsDetailsModalOpen(false);
+                    setSelectedItem(null);
+                }}
+                item={selectedItem}
+                onCommentAdded={handleCommentAdded}
             />
         </div>
     );

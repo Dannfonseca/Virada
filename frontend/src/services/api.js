@@ -30,6 +30,24 @@ export const itemsAPI = {
         return response.data;
     },
 
+    // Get single item by ID
+    getById: async (id) => {
+        const response = await api.get(`/items/${id}`);
+        return response.data;
+    },
+
+    // Add comment to item
+    addComment: async (id, text) => {
+        const response = await api.post(`/items/${id}/comments`, { text });
+        return response.data;
+    },
+
+    // Delete comment from item
+    deleteComment: async (itemId, commentId) => {
+        const response = await api.delete(`/items/${itemId}/comments/${commentId}`);
+        return response.data;
+    },
+
     // Delete item
     delete: async (id) => {
         const response = await api.delete(`/items/${id}`);
