@@ -51,8 +51,13 @@ app.use('/api/items', itemRoutes);
 
 // Serve frontend in production
 if (process.env.NODE_ENV === 'production') {
-    const frontendPath = join(__dirname, '../frontend/dist');
-    app.use(express.static(frontendPath));
+    const frontendPath = '/app/frontend/dist';
+    console.log('📁 Serving frontend from:', frontendPath);
+
+    app.use(express.static(frontendPath, {
+        maxAge: '1d',
+        etag: true
+    }));
 
     app.get('*', (req, res) => {
         res.sendFile(join(frontendPath, 'index.html'));
