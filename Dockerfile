@@ -1,44 +1,30 @@
-# Build stage
-FROM node:18-alpine AS builder
-
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-COPY backend/package*.json ./backend/
-COPY frontend/package*.json ./frontend/
-
-# Install dependencies
-RUN cd backend && npm install
-RUN cd frontend && npm install
-
-# Copy source code
-COPY backend ./backend
-COPY frontend ./frontend
-
-# Build frontend and verify
-RUN cd frontend && npm run build && ls -la dist/
-
-# Production stage
 FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy backend with node_modules
-COPY --from=builder /app/backend ./backend
+# Copy all files
+COPY . .
 
-# Copy frontend build
-COPY --from=builder /app/frontend/dist ./frontend/dist
+# Install backend dependencies
+WORKDIR /app/backend
+RUN npm install
 
-# Verify frontend dist exists
-RUN ls -la /app/frontend/dist/
+# Install frontend dependencies and build
+WORKDIR /app/frontend
+RUN npm install
+RUN npm run build
+
+# Verify build exists
+RUN ls -la dist/
+
+# Move back to app root
+WORKDIR /app
 
 # Expose port
 EXPOSE 5000
 
-# Set environment to production
+# Set environment
 ENV NODE_ENV=production
 
-# Start the application from root
-WORKDIR /app/backend
-CMD ["npm", "start"]
+# Start from backend directory
+CMD ["node", "backend/server.js"]
