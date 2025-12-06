@@ -162,7 +162,27 @@ export default function App() {
         );
     };
 
-    const filteredItems = useMemo(() => activeTab === 'ALL' ? items : items.filter(i => i.category === activeTab), [items, activeTab]);
+    const filteredItems = useMemo(() => {
+        let result = activeTab === 'ALL' ? items : items.filter(i => i.category === activeTab);
+
+        // Sort by Date (asc) then Category
+        return result.sort((a, b) => {
+            // If both have dates, sort by date
+            if (a.date && b.date) {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                if (dateA.getTime() !== dateB.getTime()) {
+                    return dateA - dateB;
+                }
+            }
+            // If only one has date, prioritize the one with date
+            if (a.date && !b.date) return -1;
+            if (!a.date && b.date) return 1;
+
+            // Secondary sort by Category (or keep original order if same category)
+            return a.category.localeCompare(b.category);
+        });
+    }, [items, activeTab]);
     const progress = useMemo(() => items.length === 0 ? 0 : Math.round((items.filter(i => i.done).length / items.length) * 100), [items]);
 
     const currentCategoryLabel = activeTab === 'ALL' ? 'Visão Geral' : CATEGORIES[Object.keys(CATEGORIES).find(key => CATEGORIES[key].id === activeTab)]?.label;

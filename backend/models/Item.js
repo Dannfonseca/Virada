@@ -16,6 +16,19 @@ const itemSchema = new mongoose.Schema({
         required: true,
         enum: ['beach', 'night', 'food', 'tour']
     },
+    date: {
+        type: Date,
+        required: false
+    },
+    time: {
+        type: String,
+        required: false
+    },
+    neighborhood: {
+        type: String,
+        trim: true,
+        required: false
+    },
     done: {
         type: Boolean,
         default: false

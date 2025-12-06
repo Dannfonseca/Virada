@@ -52,9 +52,9 @@ const VibeCard = ({ item, onToggle, onDelete, onCardClick }) => {
                             <categoryConfig.icon size={12} />
                             {categoryConfig.label}
                         </span>
-                        {item.location && (
+                        {item.neighborhood && (
                             <span className="flex items-center gap-1.5 text-[10px] font-bold text-white/70 bg-black/20 px-3 py-1.5 rounded-lg max-w-[150px] truncate border border-white/5">
-                                <MapPin size={12} /> {item.location}
+                                <MapPin size={12} /> {item.neighborhood}
                             </span>
                         )}
                         {item.comments?.length > 0 && (
@@ -63,6 +63,16 @@ const VibeCard = ({ item, onToggle, onDelete, onCardClick }) => {
                             </span>
                         )}
                     </div>
+
+                    {(item.date || item.time) && (
+                        <div className="mt-4 pt-3 border-t border-white/10 flex items-center gap-2 text-white/80">
+                            <div className="flex items-center gap-1.5 text-xs font-bold bg-white/10 px-3 py-1.5 rounded-lg">
+                                {item.date && new Date(item.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                                {item.date && item.time && ' • '}
+                                {item.time}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <button

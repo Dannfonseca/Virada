@@ -5,6 +5,9 @@ import { CATEGORIES } from '../config/categories';
 const AddModal = ({ isOpen, onClose, onAdd }) => {
     const [title, setTitle] = useState('');
     const [location, setLocation] = useState('');
+    const [neighborhood, setNeighborhood] = useState('');
+    const [date, setDate] = useState('');
+    const [time, setTime] = useState('');
     const [category, setCategory] = useState('beach');
 
     if (!isOpen) return null;
@@ -12,9 +15,12 @@ const AddModal = ({ isOpen, onClose, onAdd }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!title.trim()) return;
-        onAdd({ title, location, category });
+        onAdd({ title, location, neighborhood, date, time, category });
         setTitle('');
         setLocation('');
+        setNeighborhood('');
+        setDate('');
+        setTime('');
         onClose();
     };
 
@@ -36,7 +42,7 @@ const AddModal = ({ isOpen, onClose, onAdd }) => {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2 group">
-                        <label className="text-[10px] font-black text-blue-900/40 uppercase tracking-[0.2em] ml-4 transition-colors group-focus-within:text-orange-500">
+                        <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] ml-4 transition-colors drop-shadow-md">
                             O que vamos fazer?
                         </label>
                         <input
@@ -49,7 +55,7 @@ const AddModal = ({ isOpen, onClose, onAdd }) => {
                     </div>
 
                     <div className="space-y-2 group">
-                        <label className="text-[10px] font-black text-blue-900/40 uppercase tracking-[0.2em] ml-4 transition-colors group-focus-within:text-orange-500">
+                        <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] ml-4 transition-colors drop-shadow-md">
                             Onde fica?
                         </label>
                         <div className="relative">
@@ -63,8 +69,45 @@ const AddModal = ({ isOpen, onClose, onAdd }) => {
                         </div>
                     </div>
 
+                    <div className="space-y-2 group">
+                        <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] ml-4 transition-colors drop-shadow-md">
+                            Bairro
+                        </label>
+                        <input
+                            value={neighborhood}
+                            onChange={(e) => setNeighborhood(e.target.value)}
+                            placeholder="Ex: Ipanema"
+                            className="w-full bg-white/40 hover:bg-white/60 focus:bg-white/80 border-0 rounded-2xl px-6 py-4 font-medium text-blue-900 placeholder-blue-900/30 focus:ring-2 focus:ring-orange-400/50 transition-all shadow-inner"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2 group">
+                            <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] ml-4 transition-colors drop-shadow-md">
+                                Data
+                            </label>
+                            <input
+                                type="date"
+                                value={date}
+                                onChange={(e) => setDate(e.target.value)}
+                                className="w-full bg-white/40 hover:bg-white/60 focus:bg-white/80 border-0 rounded-2xl px-6 py-4 font-medium text-blue-900 placeholder-blue-900/30 focus:ring-2 focus:ring-orange-400/50 transition-all shadow-inner"
+                            />
+                        </div>
+                        <div className="space-y-2 group">
+                            <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] ml-4 transition-colors drop-shadow-md">
+                                Hora
+                            </label>
+                            <input
+                                type="time"
+                                value={time}
+                                onChange={(e) => setTime(e.target.value)}
+                                className="w-full bg-white/40 hover:bg-white/60 focus:bg-white/80 border-0 rounded-2xl px-6 py-4 font-medium text-blue-900 placeholder-blue-900/30 focus:ring-2 focus:ring-orange-400/50 transition-all shadow-inner"
+                            />
+                        </div>
+                    </div>
+
                     <div className="space-y-3">
-                        <label className="text-[10px] font-black text-blue-900/40 uppercase tracking-[0.2em] ml-4">
+                        <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] ml-4 drop-shadow-md">
                             Vibe do Momento
                         </label>
                         <div className="grid grid-cols-2 gap-3">

@@ -103,7 +103,7 @@ router.delete('/:id/comments/:commentId', async (req, res) => {
 // POST new item
 router.post('/', async (req, res) => {
     try {
-        const { title, location, category } = req.body;
+        const { title, location, category, date, time, neighborhood } = req.body;
 
         if (!title || !category) {
             return res.status(400).json({ error: 'Title and category are required' });
@@ -113,6 +113,9 @@ router.post('/', async (req, res) => {
             title,
             location: location || '',
             category,
+            date,
+            time,
+            neighborhood: neighborhood || '',
             done: false
         });
 
