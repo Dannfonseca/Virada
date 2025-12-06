@@ -21,7 +21,7 @@ RUN ls -la dist/
 WORKDIR /app
 
 # Expose port
-EXPOSE 5000
+EXPOSE 8080
 
 # Set environment
 ENV NODE_ENV=production

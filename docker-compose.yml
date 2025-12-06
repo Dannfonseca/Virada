@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------------------------
+  # FRONTEND SERVICE (Vite)
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8080
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  # ---------------------------------------------------------------------------
+  # BACKEND SERVICE (Node.js/Express)
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - PORT=8080
+      - MONGODB_URI=mongodb://mongo:27017/virada-no-rio
+      - NODE_ENV=development
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
+  # ---------------------------------------------------------------------------
+  # DATABASE SERVICE (MongoDB)
+  # ---------------------------------------------------------------------------
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
