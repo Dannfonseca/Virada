@@ -109,11 +109,19 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: 'Title and category are required' });
         }
 
+        // Fix timezone issue: if date is a string (YYYY-MM-DD), convert it to a proper date
+        // at noon local time to avoid timezone conversion issues
+        let processedDate = date;
+        if (date && typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+            // Create date at noon to avoid timezone issues
+            processedDate = new Date(date + 'T12:00:00');
+        }
+
         const item = new Item({
             title,
             location: location || '',
             category,
-            date,
+            date: processedDate,
             time,
             neighborhood: neighborhood || '',
             done: false
